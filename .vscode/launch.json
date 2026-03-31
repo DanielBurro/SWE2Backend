@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot App starten",
+            "request": "launch",
+            "mainClass": "com.dhbw.backend.BackendApplication",
+            "env": {
+                "DB_URL": "jdbc:postgresql://ep-floral-morning-agdcod3a-pooler.c-2.eu-central-1.aws.neon.tech/neondb?user=neondb_owner&password=npg_nUJDPEzGTZ84&sslmode=require&channelBinding=require",
+                "DB_USERNAME": "neondb_owner",
+                "DB_PASSWORD": "npg_nUJDPEzGTZ84"
+            }
+        }
+    ]
+}
