@@ -26,6 +26,3 @@ replay_pid*
 # Maven
 target/
 
-# IDE
-.vscode/
-.idea/
