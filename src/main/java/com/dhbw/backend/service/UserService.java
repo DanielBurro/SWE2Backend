@@ -19,6 +19,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    // Methode zum Abrufen eines Benutzers nach ID
     public Users getUserById(Long id) {
         if (id == null) throw new IllegalArgumentException("ID darf nicht null sein");
         return userRepository.findById(id)
@@ -27,7 +28,7 @@ public class UserService {
 
     @Transactional
     public Users registerUser(Users user) {
-        // Validierung: E-Mail darf nicht doppelt sein
+        // (1) Validierung: E-Mail darf nicht doppelt sein
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("E-Mail Adresse wird bereits verwendet.");
         }
