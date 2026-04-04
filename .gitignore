@@ -29,3 +29,5 @@ target/
 # IDE
 .vscode/
 .idea/
+
+.env
