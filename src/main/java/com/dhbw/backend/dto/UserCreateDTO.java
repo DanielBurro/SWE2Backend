@@ -9,5 +9,7 @@ public class UserCreateDTO {
     private String firstName;
     private String lastName;
     private String email;
-    private String password; // Wird später im Service gehasht
+    private String password;
+    private String bio;
+    private String profilePicUrl;
 }

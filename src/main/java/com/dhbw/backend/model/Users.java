@@ -42,4 +42,12 @@ public class Users {
     // 7. Erstellungsdatum
     @Column(name = "USER_CREATED_AT", nullable = false)
     private LocalDate createdAt;
+
+    // 28. Profilbild-URL
+    @Column(name = "USER_PROFILE_PIC_URL", length = 255)
+    private String profilePicUrl;
+
+    // 29. Info-Text über den User
+    @Column(name = "USER_BIO", columnDefinition = "TEXT")
+    private String bio; // Optional, daher kein nullable = false
 }

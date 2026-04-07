@@ -57,6 +57,8 @@ public class UserController {
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
+        dto.setBio(user.getBio());
+        dto.setProfilePicUrl(user.getProfilePicUrl());
         dto.setCreatedAt(user.getCreatedAt());
         return dto;
     }
