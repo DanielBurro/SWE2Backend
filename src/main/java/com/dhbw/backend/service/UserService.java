@@ -33,7 +33,7 @@ public class UserService {
             throw new IllegalArgumentException("E-Mail Adresse wird bereits verwendet.");
         }
         
-        // Initial-Daten setzen
+        // (3) Initial-Daten setzen
         user.setCreatedAt(LocalDate.now());
         
         return userRepository.save(user);
