@@ -4,6 +4,10 @@ import com.dhbw.backend.dto.UserCreateDTO;
 import com.dhbw.backend.dto.UserDTO;
 import com.dhbw.backend.model.Users;
 import com.dhbw.backend.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +33,11 @@ public class UserController {
         return ResponseEntity.ok(mapToDTO(userService.getUserById(id)));
     }
 
+    @Operation(summary = "Neuen Benutzer registrieren", description = "Legt einen neuen User an und hasht das Passwort.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User erfolgreich registriert"),
+            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe")
+    })
     @PostMapping("/register")
     public ResponseEntity<UserDTO> registerUser(@RequestBody UserCreateDTO dto) {
         Users user = new Users();

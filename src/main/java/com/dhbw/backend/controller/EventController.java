@@ -4,6 +4,10 @@ import com.dhbw.backend.dto.EventCreateDTO;
 import com.dhbw.backend.dto.EventResponseDTO;
 import com.dhbw.backend.model.Events;
 import com.dhbw.backend.service.EventService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +34,12 @@ public class EventController {
                 .map(this::mapToDTO).collect(Collectors.toList()));
     }
 
+    
+    @Operation(summary = "Neues Event erstellen", description = "Legt ein neues Event an.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Event erfolgreich erstellt"),
+            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe")
+    })
     @PostMapping
     public ResponseEntity<EventResponseDTO> createEvent(@RequestBody EventCreateDTO dto) {
         Events event = new Events();
