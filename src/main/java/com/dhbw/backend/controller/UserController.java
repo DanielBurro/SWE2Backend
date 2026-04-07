@@ -2,6 +2,7 @@ package com.dhbw.backend.controller;
 
 import com.dhbw.backend.dto.UserCreateDTO;
 import com.dhbw.backend.dto.UserDTO;
+import com.dhbw.backend.dto.UserUpdateDTO;
 import com.dhbw.backend.model.Users;
 import com.dhbw.backend.service.UserService;
 
@@ -50,6 +51,18 @@ public class UserController {
         return ResponseEntity.ok(mapToDTO(userService.registerUser(user)));
     }
 
+    @Operation(summary = "Benutzer aktualisieren", description = "Aktualisiert die Informationen eines bestehenden Benutzers.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Benutzer erfolgreich aktualisiert"),
+            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe"),
+            @ApiResponse(responseCode = "404", description = "Benutzer nicht gefunden")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO updateDTO) {
+    Users updatedUser = userService.updateUser(id, updateDTO);
+    return ResponseEntity.ok(mapToDTO(updatedUser));
+    }
+
     private UserDTO mapToDTO(Users user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
@@ -57,6 +70,8 @@ public class UserController {
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setEmail(user.getEmail());
+        dto.setBio(user.getBio());
+        dto.setProfilePicUrl(user.getProfilePicUrl());
         dto.setCreatedAt(user.getCreatedAt());
         return dto;
     }

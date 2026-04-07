@@ -41,3 +41,5 @@ desktop.ini
 # --- OTHERS ---
 *.ctxt
 .mtj.tmp/
+.vscode/settings.json
+target/classes/application.properties
