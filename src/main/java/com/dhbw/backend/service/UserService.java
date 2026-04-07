@@ -1,5 +1,6 @@
 package com.dhbw.backend.service;
 
+import com.dhbw.backend.dto.UserUpdateDTO;
 import com.dhbw.backend.model.Users;
 import com.dhbw.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +50,30 @@ public class UserService {
         user.setCreatedAt(LocalDate.now());
         
         return userRepository.save(user);
+    }
+
+    @SuppressWarnings("null")
+    @Transactional
+    public Users updateUser(Long id, UserUpdateDTO updateDTO) {
+        
+        Users existingUser = userRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("User mit ID " + id + " nicht gefunden."));
+
+        if (updateDTO.getFirstName() != null) existingUser.setFirstName(updateDTO.getFirstName());
+        if (updateDTO.getLastName() != null) existingUser.setLastName(updateDTO.getLastName());
+        if (updateDTO.getBio() != null) {
+            if (updateDTO.getBio().length() > 500) {
+                throw new IllegalArgumentException("Die Bio darf maximal 500 Zeichen lang sein.");
+            }
+            existingUser.setBio(updateDTO.getBio());
+        }
+        if (updateDTO.getProfilePicUrl() != null) {
+            if (!updateDTO.getProfilePicUrl().startsWith("http://") && !updateDTO.getProfilePicUrl().startsWith("https://")) {
+                throw new IllegalArgumentException("Die URL muss mit http:// oder https:// beginnen.");
+            }
+            existingUser.setProfilePicUrl(updateDTO.getProfilePicUrl());
+        }
+
+        return userRepository.save(existingUser);
     }
 }
