@@ -3,6 +3,10 @@ package com.dhbw.backend.controller;
 import com.dhbw.backend.dto.LocationDTO;
 import com.dhbw.backend.model.Location;
 import com.dhbw.backend.service.LocationService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +27,11 @@ public class LocationController {
                 .map(this::mapToDTO).collect(Collectors.toList()));
     }
 
+    @Operation(summary = "Neue Location erstellen", description = "Legt eine neue Location an.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Location erfolgreich erstellt"),
+            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe")
+    })
     @PostMapping
     public ResponseEntity<LocationDTO> createLocation(@RequestBody LocationDTO dto) {
         Location loc = new Location();
