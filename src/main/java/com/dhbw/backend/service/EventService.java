@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,23 +27,23 @@ public class EventService {
 
     @Transactional
     public Events createEvent(Events event, Long hostId, Long locationId) {
-        // Sicherheits-Check für Host
+        // (6) Datum muss in der Zukunft liegen
+        if (event.getDate() == null || event.getDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Eventdatum liegt in der Vergangenheit");
+        }
+
+        // (7) Sicherheits-Check für Host
         if (hostId == null) throw new IllegalArgumentException("Ein Event braucht zwingend einen Host.");
         
         Users host = userRepository.findById(hostId)
                 .orElseThrow(() -> new IllegalArgumentException("Host-User nicht gefunden."));
         event.setHost(host);
 
-        // Location ist laut Katalog optional (Min 0)
+        // (8) Location prüfen, falls mitgegeben
         if (locationId != null) {
-            Location loc = locationRepository.findById(locationId)
-                    .orElseThrow(() -> new IllegalArgumentException("Location nicht gefunden."));
-            event.setLocation(loc);
-        }
-
-        // Standard-Status setzen
-        if (event.getStatus() == null) {
-            event.setStatus("DRAFT");
+            Location location = locationRepository.findById(locationId)
+                    .orElseThrow(() -> new IllegalArgumentException("Location existiert nicht"));
+            event.setLocation(location);
         }
 
         return eventRepository.save(event);
