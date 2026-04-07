@@ -32,6 +32,18 @@ public class UserService {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("E-Mail Adresse wird bereits verwendet.");
         }
+
+        // (15) Validierung: Profilbild-URL muss gültig sein
+        if (user.getProfilePicUrl() != null && !user.getProfilePicUrl().isEmpty()) {
+            if (!user.getProfilePicUrl().startsWith("http://") && !user.getProfilePicUrl().startsWith("https://")) {
+                throw new IllegalArgumentException("Die URL muss mit http:// oder https:// beginnen.");
+            }
+        }
+
+        // (16) Validierung: Bio darf maximal 500 Zeichen lang sein
+        if (user.getBio() != null && user.getBio().length() > 500) {
+            throw new IllegalArgumentException("Die Bio darf maximal 500 Zeichen lang sein.");
+        }
         
         // (3) Initial-Daten setzen
         user.setCreatedAt(LocalDate.now());
