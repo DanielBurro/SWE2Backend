@@ -42,7 +42,7 @@ public class UserService {
         }
 
         // (16) Validierung: Bio darf maximal 500 Zeichen lang sein
-        if (user.getBio() != null && user.getBio().length() > 500) {
+        if (user.getBio() != null && user.getBio().length() > 200) {
             throw new IllegalArgumentException("Die Bio darf maximal 500 Zeichen lang sein.");
         }
         
@@ -55,15 +55,15 @@ public class UserService {
     @SuppressWarnings("null")
     @Transactional
     public Users updateUser(Long id, UserUpdateDTO updateDTO) {
-        
+
         Users existingUser = userRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("User mit ID " + id + " nicht gefunden."));
 
         if (updateDTO.getFirstName() != null) existingUser.setFirstName(updateDTO.getFirstName());
         if (updateDTO.getLastName() != null) existingUser.setLastName(updateDTO.getLastName());
         if (updateDTO.getBio() != null) {
-            if (updateDTO.getBio().length() > 500) {
-                throw new IllegalArgumentException("Die Bio darf maximal 500 Zeichen lang sein.");
+            if (updateDTO.getBio().length() > 200) {
+                throw new IllegalArgumentException("Die Bio darf maximal 200 Zeichen lang sein.");
             }
             existingUser.setBio(updateDTO.getBio());
         }
