@@ -46,6 +46,11 @@ public class EventService {
             event.setLocation(location);
         }
 
+        // 9. Standard-Status auf "PLANNED" setzen, falls nicht vorhanden
+        if (event.getStatus() == null) {
+            event.setStatus("PLANNED");
+        }
+
         return eventRepository.save(event);
     }
 
