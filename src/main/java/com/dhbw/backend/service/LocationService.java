@@ -17,7 +17,14 @@ public class LocationService {
     }
 
     public Location createLocation(Location location) {
+        // (5) Validierung: Standortname darf nicht leer sein
         if (location == null) throw new IllegalArgumentException("Location darf nicht null sein");
+
+        // (4) Maximale Kapazität muss größer als 0 sein (falls angegeben)
+        if (location.getCapacity() != null && location.getCapacity() <= 0) {
+            throw new IllegalArgumentException("Kapazität muss positiv sein");
+        }
+
         return locationRepository.save(location);
     }
 

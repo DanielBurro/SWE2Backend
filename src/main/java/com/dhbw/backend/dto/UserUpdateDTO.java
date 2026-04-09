@@ -3,13 +3,9 @@ package com.dhbw.backend.dto;
 import lombok.Data;
 
 @Data
-public class UserCreateDTO {
-    // Für die Registrierung
-    private String username;
+public class UserUpdateDTO {
     private String firstName;
     private String lastName;
-    private String email;
-    private String password;
     private String bio;
     private String profilePicUrl;
 }
