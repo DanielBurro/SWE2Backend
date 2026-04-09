@@ -29,6 +29,7 @@ src/main/resources/application-local.properties
 
 # IntelliJ
 .idea/
+
 *.iws
 *.iml
 *.ipr
@@ -44,3 +45,4 @@ desktop.ini
 .mtj.tmp/
 .vscode/settings.json
 target/classes/application.properties
+.env

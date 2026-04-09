@@ -1,26 +1,21 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Spring Boot App starten",
-            "request": "launch",
-            "mainClass": "com.dhbw.backend.BackendApplication",
-            "env": {
-                "DB_URL": "jdbc:postgresql://ep-floral-morning-agdcod3a-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require",
-                "DB_USERNAME": "neondb_owner",
-                "DB_PASSWORD": "npg_nUJDPEzGTZ84"
-            }
-        },
-        {
-            "type": "java",
-            "name": "Spring Boot-BackendApplication<backend>",
-            "request": "launch",
-            "cwd": "${workspaceFolder}",
-            "mainClass": "com.dhbw.backend.BackendApplication",
-            "projectName": "backend",
-            "args": "",
-            "envFile": "${workspaceFolder}/.env"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot App starten",
+      "request": "launch",
+      "mainClass": "com.dhbw.backend.BackendApplication"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-BackendApplication<backend>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.dhbw.backend.BackendApplication",
+      "projectName": "backend",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
 }
