@@ -108,6 +108,7 @@ public class UserService {
     }
 
     // Passwort ändern
+    @SuppressWarnings("null")
     @Transactional
     public void changePassword(Long id, PasswordChangeDTO dto) {
         assertCurrentUser(id);
@@ -124,6 +125,7 @@ public class UserService {
     }
 
     // User löschen
+    @SuppressWarnings("null")
     @Transactional
     public void deleteUser(Long id) {
         assertCurrentUser(id);
