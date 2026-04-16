@@ -4,6 +4,8 @@ import com.dhbw.backend.dto.UserUpdateDTO;
 import com.dhbw.backend.model.Users;
 import com.dhbw.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<Users> getAllUsers() {
         return userRepository.findAll();
@@ -41,13 +44,17 @@ public class UserService {
             }
         }
 
-        // (16) Validierung: Bio darf maximal 500 Zeichen lang sein
+        // (16) Validierung: Bio darf maximal 200 Zeichen lang sein
         if (user.getBio() != null && user.getBio().length() > 200) {
-            throw new IllegalArgumentException("Die Bio darf maximal 500 Zeichen lang sein.");
+            throw new IllegalArgumentException("Die Bio darf maximal 200 Zeichen lang sein.");
         }
         
         // (3) Initial-Daten setzen
         user.setCreatedAt(LocalDate.now());
+
+        // (2) Passwort hashenen
+        String encodedPassword = passwordEncoder.encode(user.getPasswordHash());
+        user.setPasswordHash(encodedPassword);
         
         return userRepository.save(user);
     }

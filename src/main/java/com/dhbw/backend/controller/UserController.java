@@ -46,7 +46,7 @@ public class UserController {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
-        user.setPasswordHash(dto.getPassword()); // In Echt: Password-Encoder nutzen!
+        user.setPasswordHash(dto.getPassword());
         
         return ResponseEntity.ok(mapToDTO(userService.registerUser(user)));
     }
