@@ -10,9 +10,7 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    // Ein geheimes Wort, mit dem dein Server die Stempel fälschungssicher macht.
-    // In echten Projekten steht das in den application.properties!
-    private final String SECRET_KEY = "mein_super_geheimes_eventplanner_passwort_das_niemand_kennen_darf";
+    private final String SECRET_KEY = "secret_key";
     private final Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
 
     // 1. Token generieren (Gültig für 24 Stunden)
