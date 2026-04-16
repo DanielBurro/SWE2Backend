@@ -33,6 +33,7 @@ public class EventService {
 
     // Einzelnes Event abrufen
     @SuppressWarnings("null")
+    @SuppressWarnings("null")
     public Events getEventById(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Event mit ID " + id + " nicht gefunden."));
@@ -90,6 +91,7 @@ public class EventService {
     }
 
     // Event aktualisieren
+    @SuppressWarnings("null")
     @SuppressWarnings("null")
     @Transactional
     public Events updateEvent(Long id, EventUpdateDTO dto) {
