@@ -11,6 +11,8 @@ public class EventResponseDTO {
     private String description;
     private LocalDateTime date;
     private String status;
+    private Long hostId;
     private String hostName;
+    private Long locationId;
     private String locationName;
 }
