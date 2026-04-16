@@ -105,7 +105,6 @@ public class EventService {
             event.setDate(dto.getDate());
         }
         if (dto.getLocationId() != null) {
-            @SuppressWarnings("null")
             Location location = locationRepository.findById(dto.getLocationId())
                     .orElseThrow(() -> new IllegalArgumentException("Location existiert nicht."));
             event.setLocation(location);
