@@ -32,6 +32,7 @@ public class EventService {
     }
 
     // Einzelnes Event abrufen
+    @SuppressWarnings("null")
     public Events getEventById(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Event mit ID " + id + " nicht gefunden."));
@@ -89,6 +90,7 @@ public class EventService {
     }
 
     // Event aktualisieren
+    @SuppressWarnings("null")
     @Transactional
     public Events updateEvent(Long id, EventUpdateDTO dto) {
         Events event = getEventById(id);
@@ -111,7 +113,7 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    // (neu) Status ändern
+    // Status ändern
     @Transactional
     public Events changeStatus(Long id, String newStatus) {
         if (!VALID_STATUSES.contains(newStatus)) {
@@ -123,7 +125,8 @@ public class EventService {
         return eventRepository.save(event);
     }
 
-    // (neu) Event löschen
+    // Event löschen
+    @SuppressWarnings("null")
     @Transactional
     public void deleteEvent(Long id) {
         Events event = getEventById(id);
