@@ -1,26 +1,22 @@
 package com.dhbw.backend.dto;
 
 import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class EventCreateDTO {
-    // Was das Frontend zum Erstellen schickt
+public class EventUpdateDTO {
 
-    @NotBlank(message = "Titel darf nicht leer sein.")
-    @Size(max = 100, message = "Titel darf maximal 100 Zeichen lang sein.")
+    @Size(min = 1, max = 100, message = "Titel muss zwischen 1 und 100 Zeichen lang sein.")
     private String title;
 
     private String description;
 
     // (17) Datum muss in der Zukunft liegen
-    @NotNull(message = "Datum darf nicht leer sein.")
     @Future(message = "Das Eventdatum muss in der Zukunft liegen.")
     private LocalDateTime date;
+
     private Long locationId;
 }

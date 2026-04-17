@@ -13,6 +13,9 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     
     // Alle Einladungen für ein spezifisches Event abrufen (Gästeliste)
     List<Invitation> findByEventId(Long eventId);
+
+    // Alle Einladungen für ein Event gefiltert nach Status (z.B. nur ACCEPTED)
+    List<Invitation> findByEventIdAndStatusIgnoreCase(Long eventId, String status);
     
     // Alle Einladungen abrufen, die an einen bestimmten User gesendet wurden
     List<Invitation> findByGuestId(Long guestId);
