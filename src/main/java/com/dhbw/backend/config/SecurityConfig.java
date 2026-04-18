@@ -31,8 +31,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configure(http)) // Nutzt deine CorsConfig
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Wir nutzen JWT, keine Sessions
             .authorizeHttpRequests(auth -> auth
-                // Diese Endpunkte sind für JEDEN frei zugänglich (Registrierung, Login, Swagger)
-                .requestMatchers("/api/users/register", "/api/auth/login", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                // HIER: "/" und "/error" hinzugefügt!
+                .requestMatchers("/", "/error", "/api/users/register", "/api/auth/login", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // Für alles andere MUSS man eingeloggt sein (Token haben)
                 .anyRequest().authenticated()
             )
