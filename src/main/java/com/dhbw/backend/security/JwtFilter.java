@@ -2,6 +2,7 @@ package com.dhbw.backend.security;
 
 import com.dhbw.backend.model.Users;
 import com.dhbw.backend.repository.UserRepository;
+import com.dhbw.backend.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, 
@@ -33,6 +35,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7); // Das Wort "Bearer " abschneiden
+
+            // Prüfen ob Token auf der Blacklist steht (Logout)
+            if (tokenBlacklistService.isBlacklisted(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             String email = jwtService.validateTokenAndGetEmail(token);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

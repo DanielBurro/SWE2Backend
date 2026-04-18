@@ -7,11 +7,13 @@ import com.dhbw.backend.repository.EventRepository;
 import com.dhbw.backend.repository.InvitationRepository;
 import com.dhbw.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,42 @@ public class InvitationService {
     private final InvitationRepository invitationRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+
+    // Gültige Status-Werte
+    private static final Set<String> VALID_STATUSES = Set.of("PENDING", "ACCEPTED", "DECLINED", "CANCELLED");
+
+    // Aktuell eingeloggten User aus dem JWT ermitteln
+    private Users getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Eingeloggter Benutzer nicht gefunden."));
+    }
+
+    // Einzelne Einladung abrufen
+    @SuppressWarnings("null")
+    public Invitation getInvitationById(Long id) {
+        return invitationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Einladung mit ID " + id + " nicht gefunden."));
+    }
+
+    public List<Invitation> getInvitationsForEvent(Long eventId) {
+        return invitationRepository.findByEventId(eventId);
+    }
+
+    // Gefiltert nach Status
+    public List<Invitation> getInvitationsForEventByStatus(Long eventId, String status) {
+        return invitationRepository.findByEventIdAndStatusIgnoreCase(eventId, status);
+    }
+
+    public List<Invitation> getInvitationsForUser(Long userId) {
+        return invitationRepository.findByGuestId(userId);
+    }
+
+    // Eigene Einladungen (aus JWT)
+    public List<Invitation> getMyInvitations() {
+        Users currentUser = getCurrentUser();
+        return invitationRepository.findByGuestId(currentUser.getId());
+    }
 
     @Transactional
     public Invitation sendInvitation(Long eventId, Long guestId) {
@@ -32,9 +70,14 @@ public class InvitationService {
         Users guest = userRepository.findById(guestId)
                 .orElseThrow(() -> new IllegalArgumentException("Gast nicht gefunden."));
 
-        
+        // Autorisierung: Nur der Host darf einladen
+        Users currentUser = getCurrentUser();
+        if (!event.getHost().getId().equals(currentUser.getId())) {
+            throw new SecurityException("Zugriff verweigert: Nur der Host darf Einladungen versenden.");
+        }
+
         // (11) Überprüfen, ob der Host nicht als Gast eingeladen wird
-        if (event.getHost() != null && event.getHost().getId().equals(guestId)) {
+        if (event.getHost().getId().equals(guestId)) {
             throw new IllegalArgumentException("Host kann nicht als Gast eingeladen werden.");
         }
 
@@ -59,11 +102,24 @@ public class InvitationService {
         if (invitationId == null || newStatus == null) {
             throw new IllegalArgumentException("Einladung-ID und neuer Status dürfen nicht null sein.");
         }
+
+        // Status-Validierung
+        String upperStatus = newStatus.toUpperCase();
+        if (!VALID_STATUSES.contains(upperStatus)) {
+            throw new IllegalArgumentException("Ungültiger Status. Erlaubt: " + VALID_STATUSES);
+        }
+
         Invitation inv = invitationRepository.findById(invitationId)
                 .orElseThrow(() -> new IllegalArgumentException("Einladung nicht gefunden."));
+
+        // Autorisierung: Nur der eingeladene Gast darf seinen eigenen Status ändern
+        Users currentUser = getCurrentUser();
+        if (!inv.getGuest().getId().equals(currentUser.getId())) {
+            throw new SecurityException("Zugriff verweigert: Nur der eingeladene Gast darf den Status ändern.");
+        }
         
         // (14) Kapazitätsprüfung, wenn der Status auf "ACCEPTED" gesetzt wird
-        if ("ACCEPTED".equalsIgnoreCase(newStatus)) {
+        if ("ACCEPTED".equals(upperStatus)) {
             Events event = inv.getEvent();
 
             if (event.getLocation() != null && event.getLocation().getCapacity() != null) {
@@ -73,7 +129,7 @@ public class InvitationService {
                 int additionalGuests = (plusOnes != null) ? plusOnes : 0;
                 int newAttendeesForThisInv = 1 + additionalGuests;
                 
-                // Falls die Einladung vorher schon auf ACCEPTED stand, müssen wir die alten Werte abziehen, damit diese Person bei einem Update nicht doppelt gezählt wird.
+                // Falls die Einladung vorher schon auf ACCEPTED stand, müssen wir die alten Werte abziehen
                 if ("ACCEPTED".equalsIgnoreCase(inv.getStatus())) {
                     currentAttendees -= (1 + inv.getPlusOnes());
                 }
@@ -83,10 +139,9 @@ public class InvitationService {
                     throw new IllegalStateException("Location ist bereits voll ausgebucht.");
                 }
             }
-
         }
-        inv.setStatus(newStatus.toUpperCase());
 
+        inv.setStatus(upperStatus);
         if (plusOnes != null) {
             inv.setPlusOnes(plusOnes);
         }
@@ -94,11 +149,17 @@ public class InvitationService {
         return invitationRepository.save(inv);
     }
 
-    public List<Invitation> getInvitationsForEvent(Long eventId) {
-        return invitationRepository.findByEventId(eventId);
-    }
+    // Einladung zurückziehen (nur Host)
+    @SuppressWarnings("null")
+    @Transactional
+    public void deleteInvitation(Long invitationId) {
+        Invitation inv = getInvitationById(invitationId);
 
-    public List<Invitation> getInvitationsForUser(Long userId) {
-        return invitationRepository.findByGuestId(userId);
+        Users currentUser = getCurrentUser();
+        if (!inv.getEvent().getHost().getId().equals(currentUser.getId())) {
+            throw new SecurityException("Zugriff verweigert: Nur der Host darf Einladungen zurückziehen.");
+        }
+
+        invitationRepository.deleteById(invitationId);
     }
 }
