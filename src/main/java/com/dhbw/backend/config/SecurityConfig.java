@@ -52,7 +52,7 @@ public class SecurityConfig {
         
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:4200", 
-                "https://oystrbackend.onrender.com"
+                "https://oystr.onrender.com"
         )); 
         
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
