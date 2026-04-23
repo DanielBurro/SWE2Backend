@@ -1,7 +1,6 @@
 package com.dhbw.backend.controller;
 
 import com.dhbw.backend.dto.PasswordChangeDTO;
-import com.dhbw.backend.dto.UserCreateDTO;
 import com.dhbw.backend.dto.UserDTO;
 import com.dhbw.backend.dto.UserUpdateDTO;
 import com.dhbw.backend.model.Users;
@@ -45,25 +44,6 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(mapToDTO(userService.getUserById(id)));
-    }
-
-    @Operation(summary = "Neuen Benutzer registrieren", description = "Legt einen neuen User an und hasht das Passwort.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User erfolgreich registriert"),
-            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe")
-    })
-    @PostMapping("/register")
-    public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserCreateDTO dto) {
-        Users user = new Users();
-        user.setUsername(dto.getUsername());
-        user.setFirstName(dto.getFirstName());
-        user.setLastName(dto.getLastName());
-        user.setEmail(dto.getEmail());
-        user.setPasswordHash(dto.getPassword());
-        user.setBio(dto.getBio());
-        user.setProfilePicUrl(dto.getProfilePicUrl());
-        
-        return ResponseEntity.ok(mapToDTO(userService.registerUser(user)));
     }
 
     @Operation(summary = "Benutzer aktualisieren", description = "Aktualisiert die Informationen eines bestehenden Benutzers. Nur das eigene Profil kann bearbeitet werden.")
