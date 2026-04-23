@@ -60,6 +60,7 @@ public class AuthService {
     }
 
     // --- REGISTRIERUNG ---
+    @SuppressWarnings("null")
     @Transactional
     public Users registerUser(Users newUser) {
         // (1) Eine E-Mail-Adresse darf im System nur exakt einmal existieren.
