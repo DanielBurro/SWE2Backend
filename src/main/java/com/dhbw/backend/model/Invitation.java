@@ -40,4 +40,8 @@ public class Invitation {
     // 27. Sendedatum
     @Column(name = "INV_SENT_AT", nullable = false)
     private LocalDateTime sentAt;
+
+    // 30. Einladungstoken
+    @Column(name = "INV_TOKEN", unique = true, nullable = false)
+    private String token;
 }
