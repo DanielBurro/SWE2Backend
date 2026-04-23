@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface InvitationRepository extends JpaRepository<Invitation, Long> {
@@ -19,6 +20,8 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     
     // Alle Einladungen abrufen, die an einen bestimmten User gesendet wurden
     List<Invitation> findByGuestId(Long guestId);
+
+    Optional<Invitation> findByToken(String token);
 
     // Überprüfen, ob eine Einladung für ein bestimmtes Event und einen bestimmten Gast bereits existiert
     boolean existsByEventIdAndGuestId(Long eventId, Long guestId);
