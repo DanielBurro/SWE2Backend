@@ -22,6 +22,7 @@ public class InvitationService {
     private final InvitationRepository invitationRepository;
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     // Gültige Status-Werte
     private static final Set<String> VALID_STATUSES = Set.of("PENDING", "ACCEPTED", "DECLINED", "CANCELLED");
@@ -59,6 +60,7 @@ public class InvitationService {
         return invitationRepository.findByGuestId(currentUser.getId());
     }
 
+
     @Transactional
     public Invitation sendInvitation(Long eventId, Long guestId) {
         if (eventId == null || guestId == null) {
@@ -70,13 +72,13 @@ public class InvitationService {
         Users guest = userRepository.findById(guestId)
                 .orElseThrow(() -> new IllegalArgumentException("Gast nicht gefunden."));
 
-        // Autorisierung: Nur der Host darf einladen
+        // (18) Autorisierung: Nur der Host darf einladen 
         Users currentUser = getCurrentUser();
         if (!event.getHost().getId().equals(currentUser.getId())) {
             throw new SecurityException("Zugriff verweigert: Nur der Host darf Einladungen versenden.");
         }
 
-        // (11) Überprüfen, ob der Host nicht als Gast eingeladen wird
+        // (11) Host nicht als Gast einladen
         if (event.getHost().getId().equals(guestId)) {
             throw new IllegalArgumentException("Host kann nicht als Gast eingeladen werden.");
         }
@@ -86,15 +88,33 @@ public class InvitationService {
             throw new IllegalArgumentException("Gast ist bereits eingeladen.");
         }
 
-        // (12) Status auf "PENDING" setzen und plusOnes auf 0 initialisieren
+        // (12) Status auf "PENDING", plusOnes auf 0 und Token generieren
         Invitation inv = new Invitation();
         inv.setEvent(event);
         inv.setGuest(guest);
         inv.setStatus("PENDING");
         inv.setPlusOnes(0);
-        inv.setSentAt(LocalDateTime.now()); // (13) Datum der Einladung setzen
+        inv.setSentAt(LocalDateTime.now()); // (13) Datum setzen
+        
+        // Token für den personalisierten Link
+        inv.setToken(java.util.UUID.randomUUID().toString());
 
-        return invitationRepository.save(inv);
+        Invitation savedInv = invitationRepository.save(inv);
+
+        // (20) Fehler blockiert Erstellung nicht)
+        try {
+            emailService.sendInvitationEmail(
+                guest.getEmail(), 
+                guest.getFirstName(), 
+                event.getTitle(), 
+                savedInv.getToken()
+            );
+        } catch (Exception e) {
+            // Loggen von den Fehler nur
+            System.err.println("E-Mail konnte nicht versendet werden: " + e.getMessage());
+        }
+
+        return savedInv;
     }
 
     @Transactional
