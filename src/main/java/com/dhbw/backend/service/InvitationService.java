@@ -117,6 +117,46 @@ public class InvitationService {
         return savedInv;
     }
 
+    public Invitation getInvitationByToken(String token) {
+        return invitationRepository.findByToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Ungültiger Einladungs-Token."));
+    }
+
+    @Transactional
+    public Invitation respondToInvitationByToken(String token, String newStatus, Integer plusOnes) {
+        Invitation inv = getInvitationByToken(token);
+
+        String upperStatus = newStatus.toUpperCase();
+        if (!Set.of("ACCEPTED", "DECLINED").contains(upperStatus)) {
+            throw new IllegalArgumentException("Nur ACCEPTED oder DECLINED erlaubt.");
+        }
+
+        // (14) Kapazitätsprüfung bei Zusage (Token-Weg)
+        if ("ACCEPTED".equals(upperStatus)) {
+            Events event = inv.getEvent();
+            if (event.getLocation() != null && event.getLocation().getCapacity() != null) {
+                int currentAttendees = invitationRepository.sumAcceptedAttendeesForEvent(event.getId());
+                
+                // Falls der Gast vorher schon ACCEPTED war, alten Wert abziehen
+                if ("ACCEPTED".equalsIgnoreCase(inv.getStatus())) {
+                    currentAttendees -= (1 + inv.getPlusOnes());
+                }
+
+                int additionalGuests = (plusOnes != null) ? plusOnes : 0;
+                if (currentAttendees + 1 + additionalGuests > event.getLocation().getCapacity()) {
+                    throw new IllegalStateException("Location ist bereits voll ausgebucht.");
+                }
+            }
+        }
+
+        inv.setStatus(upperStatus);
+        if (plusOnes != null) {
+            inv.setPlusOnes(plusOnes);
+        }
+        
+        return invitationRepository.save(inv);
+    }
+
     @Transactional
     public Invitation updateStatus(Long invitationId, String newStatus, Integer plusOnes) {
         if (invitationId == null || newStatus == null) {
