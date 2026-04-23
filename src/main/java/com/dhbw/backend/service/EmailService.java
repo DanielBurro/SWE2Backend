@@ -13,7 +13,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${app.frontend.url}")
+    @Value("${FRONTEND_URL}")
     private String frontendUrl;
 
     public void sendVerificationEmail(String toEmail, String token) {
