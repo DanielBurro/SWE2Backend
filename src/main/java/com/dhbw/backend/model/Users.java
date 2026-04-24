@@ -50,4 +50,8 @@ public class Users {
     // 29. Info-Text über den User
     @Column(name = "USER_BIO", columnDefinition = "TEXT")
     private String bio; // Optional, daher kein nullable = false
+
+    // 31. Verifizierungs-Status (für Double Opt-In)
+    @Column(name = "USER_IS_VERIFIED", nullable = false, columnDefinition = "boolean default false")
+    private boolean isVerified = false;
 }
