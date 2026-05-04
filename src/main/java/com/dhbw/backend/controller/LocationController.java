@@ -11,11 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,6 +25,10 @@ public class LocationController {
 
     private final LocationService locationService;
 
+    @Operation(summary = "Alle Locations abrufen", description = "Optional nach Stadt filtern: ?city=Berlin")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste aller Locations")
+    })
     @GetMapping
     public ResponseEntity<List<LocationDTO>> getAllLocations(
             @RequestParam(required = false) String city) {
@@ -34,6 +38,11 @@ public class LocationController {
         return ResponseEntity.ok(locations.stream().map(this::mapToDTO).collect(Collectors.toList()));
     }
 
+    @Operation(summary = "Location nach ID abrufen")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Location gefunden"),
+            @ApiResponse(responseCode = "404", description = "Location nicht gefunden")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<LocationDTO> getLocationById(@PathVariable Long id) {
         return ResponseEntity.ok(mapToDTO(locationService.getLocationById(id)));
@@ -41,19 +50,21 @@ public class LocationController {
 
     @Operation(summary = "Neue Location erstellen", description = "Legt eine neue Location an. Duplikate (gleicher Name + Stadt + Straße) werden abgelehnt.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Location erfolgreich erstellt"),
-            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe oder Duplikat")
+            @ApiResponse(responseCode = "201", description = "Location erfolgreich erstellt"),
+            @ApiResponse(responseCode = "409", description = "Location mit gleichem Name + Stadt + Straße existiert bereits"),
+            @ApiResponse(responseCode = "422", description = "Validierungsfehler (z.B. Pflichtfeld fehlt)")
     })
     @PostMapping
     public ResponseEntity<LocationDTO> createLocation(@Valid @RequestBody LocationCreateDTO dto) {
-        return ResponseEntity.ok(mapToDTO(locationService.createLocation(dto)));
+        // 201 Created — neue Ressource wurde angelegt
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapToDTO(locationService.createLocation(dto)));
     }
 
     @Operation(summary = "Location aktualisieren", description = "Aktualisiert die Felder einer bestehenden Location.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Location erfolgreich aktualisiert"),
-            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe"),
-            @ApiResponse(responseCode = "404", description = "Location nicht gefunden")
+            @ApiResponse(responseCode = "404", description = "Location nicht gefunden"),
+            @ApiResponse(responseCode = "422", description = "Validierungsfehler")
     })
     @PutMapping("/{id}")
     public ResponseEntity<LocationDTO> updateLocation(
@@ -63,13 +74,14 @@ public class LocationController {
 
     @Operation(summary = "Location löschen", description = "Löscht eine Location unwiderruflich.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Location erfolgreich gelöscht"),
+            @ApiResponse(responseCode = "204", description = "Location erfolgreich gelöscht"),
             @ApiResponse(responseCode = "404", description = "Location nicht gefunden")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteLocation(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteLocation(@PathVariable Long id) {
         locationService.deleteLocation(id);
-        return ResponseEntity.ok(Map.of("message", "Location erfolgreich gelöscht."));
+        // 204 No Content — kein Body nötig bei Löschung
+        return ResponseEntity.noContent().build();
     }
 
     private LocationDTO mapToDTO(Location loc) {
