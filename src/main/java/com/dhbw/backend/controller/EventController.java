@@ -11,11 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,6 +25,10 @@ public class EventController {
 
     private final EventService eventService;
 
+    @Operation(summary = "Alle Events abrufen")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste aller Events")
+    })
     @GetMapping
     public ResponseEntity<List<EventResponseDTO>> getAllEvents() {
         return ResponseEntity.ok(eventService.getAllEvents().stream()
@@ -32,17 +36,30 @@ public class EventController {
     }
 
     @Operation(summary = "Zukünftige Events abrufen", description = "Gibt alle Events zurück, die in der Zukunft liegen, sortiert nach Datum.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste zukünftiger Events")
+    })
     @GetMapping("/upcoming")
     public ResponseEntity<List<EventResponseDTO>> getUpcomingEvents() {
         return ResponseEntity.ok(eventService.getUpcomingEvents().stream()
                 .map(this::mapToDTO).collect(Collectors.toList()));
     }
 
+    @Operation(summary = "Event nach ID abrufen")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Event gefunden"),
+            @ApiResponse(responseCode = "404", description = "Event nicht gefunden")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<EventResponseDTO> getEventById(@PathVariable Long id) {
         return ResponseEntity.ok(mapToDTO(eventService.getEventById(id)));
     }
 
+    @Operation(summary = "Events eines Hosts abrufen")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste der Events des Hosts"),
+            @ApiResponse(responseCode = "404", description = "Host nicht gefunden")
+    })
     @GetMapping("/host/{hostId}")
     public ResponseEntity<List<EventResponseDTO>> getEventsByHost(@PathVariable Long hostId) {
         return ResponseEntity.ok(eventService.getEventsByHost(hostId).stream()
@@ -51,8 +68,9 @@ public class EventController {
 
     @Operation(summary = "Neues Event erstellen", description = "Legt ein neues Event an. Der Host wird automatisch aus dem JWT-Token ermittelt.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Event erfolgreich erstellt"),
-            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe")
+            @ApiResponse(responseCode = "201", description = "Event erfolgreich erstellt"),
+            @ApiResponse(responseCode = "404", description = "Location nicht gefunden"),
+            @ApiResponse(responseCode = "422", description = "Validierungsfehler (z.B. Pflichtfeld fehlt)")
     })
     @PostMapping
     public ResponseEntity<EventResponseDTO> createEvent(@Valid @RequestBody EventCreateDTO dto) {
@@ -62,15 +80,17 @@ public class EventController {
         event.setDate(dto.getDate());
 
         Events savedEvent = eventService.createEvent(event, dto.getLocationId());
-        return ResponseEntity.ok(mapToDTO(savedEvent));
+
+        // 201 Created — neue Ressource wurde angelegt
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapToDTO(savedEvent));
     }
 
     @Operation(summary = "Event aktualisieren", description = "Aktualisiert Titel, Beschreibung, Datum oder Location. Nur der Host darf ändern.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Event erfolgreich aktualisiert"),
-            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe"),
             @ApiResponse(responseCode = "403", description = "Nur der Host darf dieses Event bearbeiten"),
-            @ApiResponse(responseCode = "404", description = "Event nicht gefunden")
+            @ApiResponse(responseCode = "404", description = "Event nicht gefunden"),
+            @ApiResponse(responseCode = "422", description = "Validierungsfehler")
     })
     @PutMapping("/{id}")
     public ResponseEntity<EventResponseDTO> updateEvent(@PathVariable Long id, @Valid @RequestBody EventUpdateDTO dto) {
@@ -80,8 +100,9 @@ public class EventController {
     @Operation(summary = "Event-Status ändern", description = "Setzt den Status auf PLANNED, ACTIVE, CANCELLED oder DONE. Nur der Host darf das.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Status erfolgreich geändert"),
-            @ApiResponse(responseCode = "400", description = "Ungültiger Status"),
-            @ApiResponse(responseCode = "403", description = "Nur der Host darf den Status ändern")
+            @ApiResponse(responseCode = "403", description = "Nur der Host darf den Status ändern"),
+            @ApiResponse(responseCode = "404", description = "Event nicht gefunden"),
+            @ApiResponse(responseCode = "422", description = "Ungültiger Status-Wert")
     })
     @PutMapping("/{id}/status")
     public ResponseEntity<EventResponseDTO> changeStatus(
@@ -92,14 +113,15 @@ public class EventController {
 
     @Operation(summary = "Event löschen", description = "Löscht das Event unwiderruflich. Nur der Host darf löschen.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Event erfolgreich gelöscht"),
+            @ApiResponse(responseCode = "204", description = "Event erfolgreich gelöscht"),
             @ApiResponse(responseCode = "403", description = "Nur der Host darf dieses Event löschen"),
             @ApiResponse(responseCode = "404", description = "Event nicht gefunden")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteEvent(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         eventService.deleteEvent(id);
-        return ResponseEntity.ok(Map.of("message", "Event erfolgreich gelöscht."));
+        // 204 No Content — kein Body nötig bei Löschung
+        return ResponseEntity.noContent().build();
     }
 
     private EventResponseDTO mapToDTO(Events event) {
