@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,6 +24,10 @@ public class UserController {
 
     private final UserService userService;
 
+    @Operation(summary = "Alle Benutzer abrufen")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste aller Benutzer")
+    })
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers().stream()
@@ -41,6 +44,11 @@ public class UserController {
         return ResponseEntity.ok(mapToDTO(userService.getCurrentUser()));
     }
 
+    @Operation(summary = "Benutzer nach ID abrufen")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Benutzer gefunden"),
+            @ApiResponse(responseCode = "404", description = "Benutzer nicht gefunden")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(mapToDTO(userService.getUserById(id)));
@@ -49,9 +57,9 @@ public class UserController {
     @Operation(summary = "Benutzer aktualisieren", description = "Aktualisiert die Informationen eines bestehenden Benutzers. Nur das eigene Profil kann bearbeitet werden.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Benutzer erfolgreich aktualisiert"),
-            @ApiResponse(responseCode = "400", description = "Ungültige Eingabe"),
-            @ApiResponse(responseCode = "403", description = "Zugriff verweigert"),
-            @ApiResponse(responseCode = "404", description = "Benutzer nicht gefunden")
+            @ApiResponse(responseCode = "403", description = "Nur das eigene Profil darf bearbeitet werden"),
+            @ApiResponse(responseCode = "404", description = "Benutzer nicht gefunden"),
+            @ApiResponse(responseCode = "422", description = "Validierungsfehler")
     })
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO updateDTO) {
@@ -61,26 +69,29 @@ public class UserController {
 
     @Operation(summary = "Passwort ändern", description = "Ändert das Passwort des Benutzers. Das aktuelle Passwort muss korrekt angegeben werden.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Passwort erfolgreich geändert"),
-            @ApiResponse(responseCode = "400", description = "Aktuelles Passwort falsch oder Validierungsfehler"),
-            @ApiResponse(responseCode = "403", description = "Zugriff verweigert")
+            @ApiResponse(responseCode = "204", description = "Passwort erfolgreich geändert"),
+            @ApiResponse(responseCode = "401", description = "Aktuelles Passwort falsch"),
+            @ApiResponse(responseCode = "403", description = "Nur das eigene Passwort darf geändert werden"),
+            @ApiResponse(responseCode = "422", description = "Validierungsfehler (z.B. neues Passwort zu kurz)")
     })
     @PutMapping("/{id}/password")
-    public ResponseEntity<Map<String, String>> changePassword(@PathVariable Long id, @Valid @RequestBody PasswordChangeDTO dto) {
+    public ResponseEntity<Void> changePassword(@PathVariable Long id, @Valid @RequestBody PasswordChangeDTO dto) {
         userService.changePassword(id, dto);
-        return ResponseEntity.ok(Map.of("message", "Passwort erfolgreich geändert."));
+        // 204 No Content — kein Body nötig
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Benutzer löschen", description = "Löscht den eigenen Account unwiderruflich.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Benutzer erfolgreich gelöscht"),
-            @ApiResponse(responseCode = "403", description = "Zugriff verweigert"),
+            @ApiResponse(responseCode = "204", description = "Benutzer erfolgreich gelöscht"),
+            @ApiResponse(responseCode = "403", description = "Nur der eigene Account darf gelöscht werden"),
             @ApiResponse(responseCode = "404", description = "Benutzer nicht gefunden")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok(Map.of("message", "Benutzer erfolgreich gelöscht."));
+        // 204 No Content — kein Body nötig bei Löschung
+        return ResponseEntity.noContent().build();
     }
 
     private UserDTO mapToDTO(Users user) {
