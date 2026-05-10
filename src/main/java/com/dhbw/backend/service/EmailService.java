@@ -83,7 +83,7 @@ public class EmailService {
 
     @SuppressWarnings("null")
     public void sendInvitationEmail(String toEmail, String guestName, String eventTitle, String token) {
-        String invitationUrl = frontendUrl + "/invitation/view?token=" + token;
+        String invitationUrl = frontendUrl + "/api/public/invitations/info?token=" + token;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -113,7 +113,7 @@ public class EmailService {
                                             <p style="font-size: 16px; color: #cccccc;">einzuladen. Wir würden uns sehr freuen, diesen besonderen Anlass mit dir zu feiern.</p>
                                             
                                             <div style="margin-top: 40px;">
-                                                <a href="%s" style="background-color: #d4af37; color: #000000; padding: 15px 30px; text-decoration: none; font-weight: bold; border-radius: 5px; font-size: 16px; display: inline-block;">DETAILS ANSEHEN & ZUSAGEN</a>
+                                                <a href="localhost:4200/profile" style="background-color: #d4af37; color: #000000; padding: 15px 30px; text-decoration: none; font-weight: bold; border-radius: 5px; font-size: 16px; display: inline-block;">Guck nach!!</a>
                                             </div>
                                         </td>
                                     </tr>

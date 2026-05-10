@@ -38,7 +38,7 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults()) 
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/error", "/api/auth/**", "/api/auth/login", "/swagger-ui/**", "/v3/api-docs/**", "/api/public/**").permitAll()
+                .requestMatchers("/", "/error", "/api/auth/**", "/api/auth/login", "/swagger-ui/**", "/v3/api-docs/**", "/api/public/**", "/invitation/view").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -52,6 +52,7 @@ public class SecurityConfig {
         
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:4200", 
+                "http://localhost:8080",
                 "https://oystr.onrender.com"
         )); 
         
